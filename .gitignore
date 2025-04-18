@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/*.py[cod]
+*$py.class
+# C extensions*.so
+# Distribution / packaging
+dist/build/
+*.egg-info/
+# Virtual environmentsvenv/
+env/.env/
+.venv/
+venv/
+# IDE specific files.idea/
+.vscode/*.swp
+*.swo
+# Unit test / coverage reportshtmlcov/
+.tox/.coverage
+.coverage.*.cache
+coverage.xml*.cover
+# Logs
+*.log
+# Local development settings.env
+.env.local
+# Jupyter Notebook
+.ipynb_checkpoints
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

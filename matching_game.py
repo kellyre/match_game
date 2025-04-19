@@ -17,6 +17,8 @@ class MatchingGame:
         self.attempts = 0
         self.start_time = None
         self.game_active = False
+        self.pending_hide_id = None  # Store the after() ID for cancellation
+        self.buttons_to_hide = None  # Store the buttons to hide when a match fails
         
         # Available colors for characters
         self.colors = ["red", "blue", "green", "purple", "orange", "cyan", "magenta", "brown"]
@@ -108,8 +110,26 @@ class MatchingGame:
         if not self.start_time and self.game_active:
             self.start_time = time.time()
         
-        # Ignore clicks on already revealed buttons or when two are already flipped
-        if not self.game_active or self.buttons[row][col]["revealed"]:
+        # Ignore clicks on already revealed buttons
+        if self.buttons[row][col]["revealed"]:
+            return
+        
+        # If there's a pending hide operation and user clicks a new button
+        if not self.game_active and self.pending_hide_id is not None:
+            # Cancel the scheduled hide operation
+            self.root.after_cancel(self.pending_hide_id)
+            self.pending_hide_id = None
+            
+            # Hide the previously non-matching buttons
+            prev_row1, prev_col1, prev_row2, prev_col2 = self.buttons_to_hide
+            self.hide_buttons(prev_row1, prev_col1, prev_row2, prev_col2)
+            
+            # Reset first click to None so this new click becomes the first of a new pair
+            self.first_click = None
+            self.game_active = True
+        
+        # Ignore clicks when game is not active (other scenarios)
+        if not self.game_active:
             return
         
         # Reveal the clicked button
@@ -141,7 +161,11 @@ class MatchingGame:
             else:
                 # No match, hide after delay
                 self.game_active = False
-                self.root.after(2000, lambda: self.hide_buttons(row, col, first_row, first_col))
+                self.buttons_to_hide = (row, col, first_row, first_col)
+                self.pending_hide_id = self.root.after(
+                    2000, 
+                    lambda: self.hide_buttons(row, col, first_row, first_col)
+                )
             
             # Reset first click
             self.first_click = None
@@ -151,6 +175,7 @@ class MatchingGame:
         self.buttons[row1][col1]["button"].config(text="", bg="SystemButtonFace")
         self.buttons[row2][col2]["button"].config(text="", bg="SystemButtonFace")
         self.game_active = True
+        self.pending_hide_id = None  # Reset the pending hide ID
     
     def show_game_over(self):
         elapsed_time = time.time() - self.start_time
@@ -168,5 +193,8 @@ if __name__ == "__main__":
     root = tk.Tk()
     game = MatchingGame(root)
     root.mainloop()
+
+
+
 
 
